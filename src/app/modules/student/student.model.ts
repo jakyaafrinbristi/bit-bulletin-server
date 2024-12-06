@@ -1,15 +1,14 @@
 import { Schema, model } from 'mongoose';
-import bcrypt from 'bcrypt';
 
 import {
   TGuardian,
   TLocalGuardian,
   TStudent,
   // StudentMethods,
-  StudentModel,
+  // StudentModel,
   TUserName,
-} from './student/student.interface';
-import config from '../config';
+} from './student.interface';
+
 // import validator from 'validator';
 
 const userNameSchema = new Schema<TUserName>({
@@ -99,7 +98,8 @@ const localGuardianSchema = new Schema<TLocalGuardian>({
 });
 // const studentSchema = new Schema<TStudent, StudentModel, StudentMethods>//3ta parameter instance er jonno
 
-const studentSchema = new Schema<TStudent, StudentModel>(
+// const studentSchema = new Schema<TStudent, StudentModel>(
+const studentSchema = new Schema<TStudent>(
   {
     id: {
       type: String,
@@ -107,13 +107,14 @@ const studentSchema = new Schema<TStudent, StudentModel>(
       unique: true,
       trim: true,
     },
-    password: {
-      type: String,
-      required: [true, 'Student Password is required'],
 
-      trim: true,
-      maxlength: [20, 'password can not be more than 20 characters'],
+    user:{
+      type:Schema.Types.ObjectId,
+      required:[true, 'User Id is required'],
+      unique:true,
+      ref:'User'
     },
+
     name: {
       type: userNameSchema,
       required: [true, 'Name is required'],
@@ -133,7 +134,7 @@ const studentSchema = new Schema<TStudent, StudentModel>(
     },
     email: {
       type: String,
-      required: [true, 'Email is required'],
+
       unique: true,
       trim: true,
       //
@@ -178,15 +179,18 @@ const studentSchema = new Schema<TStudent, StudentModel>(
       type: String,
       trim: true,
     },
-    isActive: {
-      type: String,
-      enum: {
-        values: ['active', 'blocked'],
-        message: '{VALUE} is not a valid status',
-      },
-      default: 'active',
-      trim: true,
-    },
+
+    //dorker nai user chole gese
+
+    // isActive: {
+    //   type: String,
+    //   enum: {
+    //     values: ['active', 'blocked'],
+    //     message: '{VALUE} is not a valid status',
+    //   },
+    //   default: 'active',
+    //   trim: true,
+    // },
 
     isDeleted: {
       type: Boolean,
@@ -205,24 +209,7 @@ studentSchema.virtual('fullName').get(function () {
   return this.name.firstName + this.name.middleName + this.name.lastName;
 });
 
-// pre save middleware/ hook : will work on create()  save()
-studentSchema.pre('save', async function (next) {
-  // console.log(this, 'pre hook : we will save  data');
-  // eslint-disable-next-line @typescript-eslint/no-this-alias
-  const user = this; // doc
-  // hashing password and save into DB
-  user.password = await bcrypt.hash(
-    user.password,
-    Number(config.bcrypt_salt_rounds),
-  );
-  next();
-});
-// post save middleware / hook
-studentSchema.post('save', function (doc, next) {
-  // console.log(this, 'post hook : we  saved our  data');
-  doc.password = '';
-  next();
-});
+
 // Query Middleware-find
 studentSchema.pre('find', function (next) {
   this.find({ isDeleted: { $ne: true } });
@@ -252,4 +239,5 @@ studentSchema.statics.isUserExists = async function (id: string) {
 //   return existingUser;
 // };
 
-export const Student = model<TStudent, StudentModel>('Student', studentSchema);
+// export const Student = model<TStudent, StudentModel>('Student', studentSchema);
+export const Student = model<TStudent>('Student', studentSchema);
