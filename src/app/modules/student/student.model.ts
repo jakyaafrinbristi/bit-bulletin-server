@@ -108,11 +108,11 @@ const studentSchema = new Schema<TStudent>(
       trim: true,
     },
 
-    user:{
-      type:Schema.Types.ObjectId,
-      required:[true, 'User Id is required'],
-      unique:true,
-      ref:'User'
+    user: {
+      type: Schema.Types.ObjectId,
+      required: [true, 'User Id is required'],
+      unique: true,
+      ref: 'User',
     },
 
     name: {
@@ -129,7 +129,7 @@ const studentSchema = new Schema<TStudent>(
       trim: true,
     },
     dateOfBirth: {
-      type: String,
+      type: Date,
       trim: true,
     },
     email: {
@@ -179,6 +179,10 @@ const studentSchema = new Schema<TStudent>(
       type: String,
       trim: true,
     },
+    admissionSemester: {
+      type: Schema.Types.ObjectId,
+      ref: 'AcademicSemester',
+    },
 
     //dorker nai user chole gese
 
@@ -208,7 +212,6 @@ const studentSchema = new Schema<TStudent>(
 studentSchema.virtual('fullName').get(function () {
   return this.name.firstName + this.name.middleName + this.name.lastName;
 });
-
 
 // Query Middleware-find
 studentSchema.pre('find', function (next) {

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const userNameSchema = z.object({
+const userNameValidationSchema = z.object({
   firstName: z
     .string()
     .min(1)
@@ -12,7 +12,7 @@ const userNameSchema = z.object({
   lastName: z.string(),
 });
 
-const guardianSchema = z.object({
+const guardianValidationSchema = z.object({
   fatherName: z.string(),
   fatherOccupation: z.string(),
   fatherContactNo: z.string(),
@@ -21,17 +21,19 @@ const guardianSchema = z.object({
   motherContactNo: z.string(),
 });
 
-const localGuardianSchema = z.object({
+const localguardianValidationSchema = z.object({
   name: z.string(),
   occupation: z.string(),
   contactNo: z.string(),
   address: z.string(),
 });
 
-export const studentValidationSchema = z.object({
-  id: z.string(),
+export const createStudentValidationSchema = z.object({
+body:z.object({
+
   password: z.string().max(20),
-  name: userNameSchema,
+student : z.object({
+  name: userNameValidationSchema,
   gender: z.enum(['male', 'female', 'other']),
   dateOfBirth: z.string(),
   email: z.string().email(),
@@ -40,11 +42,15 @@ export const studentValidationSchema = z.object({
   bloodGroup: z.enum(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']),
   presentAddress: z.string(),
   permanentAddress: z.string(),
-  guardian: guardianSchema,
-  localGuardian: localGuardianSchema,
+  guardian: guardianValidationSchema,
+  localGuardian: localguardianValidationSchema,
+  admissionSemester:z.string(),
   profileImg: z.string(),
-  isActive: z.enum(['active', 'blocked']).default('active'),
-  isDeleted: z.boolean().optional().default(false),
+})
+
+})
 });
 
-export default studentValidationSchema;
+export const studentValidations={
+  createStudentValidationSchema}
+

@@ -1,8 +1,7 @@
-import { NextFunction, Request, Response } from 'express';
 import { StudentServices } from './student.service';
 import sendResponse from '../../utils/sendResponse';
 import httpStatus from 'http-status';
-
+import catchAsync from '../../utils/catchAsync';
 
 // import studentValidationSchema from './student.joi.validation';
 
@@ -44,58 +43,40 @@ import httpStatus from 'http-status';
 //   }
 // };
 
-const getAllStudents = async (req: Request, res: Response ,next:NextFunction) => {
-  try {
-    const result = await StudentServices.getAllStudentsFromDB();
+const getAllStudents = catchAsync(async (req, res) => {
+  const result = await StudentServices.getAllStudentsFromDB();
 
-    sendResponse(res,{
-      statusCode: httpStatus.Ok,
-      success: true,
-      message: "Student retrived SuccessFully",
-      data: result
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Student retrived SuccessFully',
+    data: result,
   });
-  } catch (err) {
-    // res.status(500).json({
-    //   success: false,
-    //   message: err.message || 'Something Went Wrong',
-    //   error: err,
-    // });
-    next(err)
-  }
-};
+});
+const getSingleStudent = catchAsync(async (req, res) => {
+  const { studentId } = req.params;
 
-const getSingleStudent = async (req: Request, res: Response ,next:NextFunction) => {
-  try {
-    const { studentId } = req.params;
+  const result = await StudentServices.getSingleStudentFromDB(studentId);
 
-    const result = await StudentServices.getSingleStudentFromDB(studentId);
-
-    sendResponse(res,{
-      statusCode: httpStatus.Ok,
-      success: true,
-      message: "Student is retrived SuccessFully",
-      data: result
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Student is retrived SuccessFully',
+    data: result,
   });
-  } catch (err) {
-    next(err)
-  }
-};
-const getDeleteStudent = async (req: Request, res: Response ,next:NextFunction) => {
-  try {
-    const { studentId } = req.params;
+});
+const getDeleteStudent = catchAsync(async (req, res) => {
+  const { studentId } = req.params;
 
-    const result = await StudentServices.deleteStudentFromDB(studentId);
+  const result = await StudentServices.deleteStudentFromDB(studentId);
 
-    sendResponse(res,{
-      statusCode: httpStatus.Ok,
-      success: true,
-      message: "Student deleted SuccessFully",
-      data: result
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Student deleted SuccessFully',
+    data: result,
   });
-  } catch (err) {
-    next(err)
-  }
-};
+});
 
 export const StudentControllers = {
   getAllStudents,
