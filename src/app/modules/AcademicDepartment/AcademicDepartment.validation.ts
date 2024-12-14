@@ -33,4 +33,4 @@ const updateAcademicDepartmentValidationSchema = z.object({
 export const AcademicDepartmentValidation = {
   createAcademicDepartmentValidationSchema,
   updateAcademicDepartmentValidationSchema,
-}; 
+};

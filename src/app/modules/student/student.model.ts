@@ -5,7 +5,7 @@ import {
   TLocalGuardian,
   TStudent,
   // StudentMethods,
-  // StudentModel,
+  StudentModel,
   TUserName,
 } from './student.interface';
 
@@ -134,6 +134,7 @@ const studentSchema = new Schema<TStudent>(
     },
     email: {
       type: String,
+      required: [true, 'Email is required'],
 
       unique: true,
       trim: true,
@@ -214,7 +215,7 @@ const studentSchema = new Schema<TStudent>(
 
 // virtual
 studentSchema.virtual('fullName').get(function () {
-  return this.name.firstName + this.name.middleName + this.name.lastName;
+  return this?.name?.firstName + this?.name?.middleName + this?.name?.lastName;
 });
 
 // Query Middleware-find
@@ -247,4 +248,4 @@ studentSchema.statics.isUserExists = async function (id: string) {
 // };
 
 // export const Student = model<TStudent, StudentModel>('Student', studentSchema);
-export const Student = model<TStudent>('Student', studentSchema);
+export const Student = model<TStudent, StudentModel>('Student', studentSchema);

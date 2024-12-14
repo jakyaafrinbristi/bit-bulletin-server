@@ -1,7 +1,8 @@
+import { Server } from 'http';
 import app from './App';
 import config from './app/config';
 import mongoose from 'mongoose';
-
+let server: Server;
 // const mongoose = require('mongoose');
 
 // main().catch(err => console.log(err));
@@ -9,7 +10,7 @@ import mongoose from 'mongoose';
 async function main() {
   try {
     await mongoose.connect(config.database_url as string);
-    app.listen(config.port, () => {
+    server = app.listen(config.port, () => {
       console.log(`Example app listening on port ${config.port}`);
     });
   } catch (err) {
@@ -17,3 +18,18 @@ async function main() {
   }
 }
 main();
+process.on('unhandledRejection', () => {
+  console.log(`😈 unahandledRejection is detected , shutting down ...`);
+  if (server) {
+    server.close(() => {
+      process.exit(1);
+    });
+  }
+  process.exit(1);
+});
+process.on('uncaughtException', () => {
+  console.log(`😡  uncaughtException is detected shutting down .....`);
+
+  process.exit(1);
+});
+// console.log(x)

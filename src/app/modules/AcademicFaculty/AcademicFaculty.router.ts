@@ -4,7 +4,6 @@ import validateRequest from '../../middlewares/validateRequest';
 import { AcademicFacultyValidation } from './AcademicFaculty.validation';
 import { AcademicFacultyControllers } from './AcademicFaculty.controllers';
 
-
 const router = express.Router();
 
 router.post(

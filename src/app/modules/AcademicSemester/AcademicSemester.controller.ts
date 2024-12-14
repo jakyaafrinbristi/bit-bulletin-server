@@ -1,14 +1,12 @@
-
 import httpStatus from 'http-status';
 import sendResponse from '../../utils/sendResponse';
 import catchAsync from '../../utils/catchAsync';
 import { AcademicSemesterServices } from './AcademicSemester.service';
 
 const createAcademicSemester = catchAsync(async (req, res) => {
-
-    const result = await AcademicSemesterServices.createAcademicSemesterIntoDb(
-        req.body,
-    );
+  const result = await AcademicSemesterServices.createAcademicSemesterIntoDb(
+    req.body,
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -55,8 +53,8 @@ const updateAcademicSemester = catchAsync(async (req, res) => {
 });
 
 export const AcademicSemesterControllers = {
- createAcademicSemester,
- getAllAcademicSemesters,
- getSingleAcademicSemester,
- updateAcademicSemester
+  createAcademicSemester,
+  getAllAcademicSemesters,
+  getSingleAcademicSemester,
+  updateAcademicSemester,
 };
