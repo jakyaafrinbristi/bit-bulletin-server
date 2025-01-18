@@ -36,7 +36,7 @@ const createSemesterRegistrationIntoDb = async (payload : TSemesterRegistration)
             'This academic Semester not found !'
         )
     }
- //if the semester already exist
+ //if the semester already registerd 
     const isSemesterRegisTrationExists = await SemesterRegistration.findOne({
       academicSemester,  
     })

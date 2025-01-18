@@ -3,6 +3,7 @@ import validateRequest from '../../middlewares/validateRequest';
 import { AcademicDepartmentValidation } from './AcademicDepartment.validation';
 import { AcademicDepartmentControllers } from './AcademicDepartment.controller';
 
+
 const router = express.Router();
 
 router.post(
