@@ -43,7 +43,7 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
       message: 'Something Went Wrong',
     },
   ];
- 
+
   if (err instanceof ZodError) {
     const simplifiedError = handleZodError(err);
     statusCode = simplifiedError?.statusCode;

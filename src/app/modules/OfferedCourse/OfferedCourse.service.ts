@@ -1,33 +1,31 @@
-import QueryBuilder from "../../builder/QueryBuilder";
-import { TOfferedCourse } from "./OfferedCourse.interface";
-import { OfferedCourse } from "./OfferedCourse.model";
+import QueryBuilder from '../../builder/QueryBuilder';
+import { TOfferedCourse } from './OfferedCourse.interface';
+import { OfferedCourse } from './OfferedCourse.model';
 
 import { Course } from '../Course/course.model';
 import { Faculty } from '../Faculty/faculty.model';
 
 import httpStatus from 'http-status';
-import AppError from "../../errors/AppError";
-import { AcademicFaculty } from "../AcademicFaculty/Academicfaculty.model";
-import { AcademicDepartment } from "../AcademicDepartment/AcademicDepartment.model";
-import { SemesterRegistration } from "../SemesterRegistration/semesterRegistration.model";
-import { hasTimeConflict } from "./OfferedCourse.utils";
+import AppError from '../../errors/AppError';
+import { AcademicFaculty } from '../AcademicFaculty/Academicfaculty.model';
+import { AcademicDepartment } from '../AcademicDepartment/AcademicDepartment.model';
+import { SemesterRegistration } from '../SemesterRegistration/semesterRegistration.model';
+import { hasTimeConflict } from './OfferedCourse.utils';
 
-const createOfferedCourseIntoDb = async(payload : TOfferedCourse) =>{
-    const {
-        semesterRegistration,
-        academicFaculty,
-        academicDepartment,
-        course,
-        section,
+const createOfferedCourseIntoDb = async (payload: TOfferedCourse) => {
+  const {
+    semesterRegistration,
+    academicFaculty,
+    academicDepartment,
+    course,
+    section,
 
-        faculty,
-        days,
-        startTime,
-        endTime
-        
-       
-      } = payload;
-       //check if the semester registration id is exists!
+    faculty,
+    days,
+    startTime,
+    endTime,
+  } = payload;
+  //check if the semester registration id is exists!
   const isSemesterRegistrationExits =
     await SemesterRegistration.findById(semesterRegistration);
 
@@ -37,35 +35,35 @@ const createOfferedCourseIntoDb = async(payload : TOfferedCourse) =>{
       'Semester registration not found !',
     );
   }
-  
+
   const academicSemester = isSemesterRegistrationExits.academicSemester;
 
   const isAcademicFacultyExits =
-  await AcademicFaculty.findById(academicFaculty);
+    await AcademicFaculty.findById(academicFaculty);
 
-if (!isAcademicFacultyExits) {
-  throw new AppError(httpStatus.NOT_FOUND, 'Academic Faculty not found !');
-}
+  if (!isAcademicFacultyExits) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Academic Faculty not found !');
+  }
 
-const isAcademicDepartmentExits =
-await AcademicDepartment.findById(academicDepartment);
+  const isAcademicDepartmentExits =
+    await AcademicDepartment.findById(academicDepartment);
 
-if (!isAcademicDepartmentExits) {
-throw new AppError(httpStatus.NOT_FOUND, 'Academic Department not found !');
-}
-const isCourseExits = await Course.findById(course);
+  if (!isAcademicDepartmentExits) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Academic Department not found !');
+  }
+  const isCourseExits = await Course.findById(course);
 
-if (!isCourseExits) {
-  throw new AppError(httpStatus.NOT_FOUND, 'Course not found !');
-}
+  if (!isCourseExits) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Course not found !');
+  }
 
-const isFacultyExits = await Faculty.findById(faculty);
+  const isFacultyExits = await Faculty.findById(faculty);
 
-if (!isFacultyExits) {
-  throw new AppError(httpStatus.NOT_FOUND, 'Faculty not found !');
-}
-// check if the department is belong to the  faculty
-const isDepartmentBelongToFaculty = await AcademicDepartment.findOne({
+  if (!isFacultyExits) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Faculty not found !');
+  }
+  // check if the department is belong to the  faculty
+  const isDepartmentBelongToFaculty = await AcademicDepartment.findOne({
     _id: academicDepartment,
     academicFaculty,
   });
@@ -76,28 +74,28 @@ const isDepartmentBelongToFaculty = await AcademicDepartment.findOne({
       `This ${isAcademicDepartmentExits.name} is not  belong to this ${isAcademicFacultyExits.name}`,
     );
   }
-   // check if the same offered course same section in same registered semester exists
+  // check if the same offered course same section in same registered semester exists
 
-   const isSameOfferedCourseExistsWithSameRegisteredSemesterWithSameSection =
-   await OfferedCourse.findOne({
-     semesterRegistration,
-     course,
-     section,
-   });
+  const isSameOfferedCourseExistsWithSameRegisteredSemesterWithSameSection =
+    await OfferedCourse.findOne({
+      semesterRegistration,
+      course,
+      section,
+    });
 
- if (isSameOfferedCourseExistsWithSameRegisteredSemesterWithSameSection) {
-   throw new AppError(
-     httpStatus.BAD_REQUEST,
-     `Offered course with same section is already exist!`,
-   );
- }
-   // get the schedules of the faculties
-   const assignedSchedules = await OfferedCourse.find({
+  if (isSameOfferedCourseExistsWithSameRegisteredSemesterWithSameSection) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      `Offered course with same section is already exist!`,
+    );
+  }
+  // get the schedules of the faculties
+  const assignedSchedules = await OfferedCourse.find({
     semesterRegistration,
     faculty,
     days: { $in: days },
   }).select('days startTime endTime');
-  
+
   const newSchedule = {
     days,
     startTime,
@@ -110,28 +108,24 @@ const isDepartmentBelongToFaculty = await AcademicDepartment.findOne({
     );
   }
 
-    const result = await OfferedCourse.create({...payload,academicSemester})
-    return result;
-
-
-}
-const getAllOfferedCoursesFromDb = async(query : Record<string ,unknown>) =>{
-    const offeredCourseQuery = new QueryBuilder(OfferedCourse.find(),query)
+  const result = await OfferedCourse.create({ ...payload, academicSemester });
+  return result;
+};
+const getAllOfferedCoursesFromDb = async (query: Record<string, unknown>) => {
+  const offeredCourseQuery = new QueryBuilder(OfferedCourse.find(), query)
     .filter()
     .sort()
     .paginate()
-    .fields()
+    .fields();
 
-    const result = await offeredCourseQuery.modelQuery;
-    return result;
-}
+  const result = await offeredCourseQuery.modelQuery;
+  return result;
+};
 
-const getSingleOfferedCourseFromDb = async(id:string) =>{
-    const offeredCourse =await OfferedCourse.findById(id)
-    return offeredCourse;
-
-
-}
+const getSingleOfferedCourseFromDb = async (id: string) => {
+  const offeredCourse = await OfferedCourse.findById(id);
+  return offeredCourse;
+};
 const updateOfferedCourseIntoDb = async (
   id: string,
   payload: Pick<TOfferedCourse, 'faculty' | 'days' | 'startTime' | 'endTime'>,
@@ -159,7 +153,6 @@ const updateOfferedCourseIntoDb = async (
 
   const semesterRegistration = isOfferedCourseExists.semesterRegistration;
   // get the schedules of the faculties
-
 
   // Checking the status of the semester registration
   const semesterRegistrationStatus =
@@ -198,16 +191,14 @@ const updateOfferedCourseIntoDb = async (
   return result;
 };
 
-
-
-const deleteOfferedCourseFromDb = async(id:string) =>{
-    const offeredCourse =await OfferedCourse.findById(id)
-    return offeredCourse;
-}
+const deleteOfferedCourseFromDb = async (id: string) => {
+  const offeredCourse = await OfferedCourse.findById(id);
+  return offeredCourse;
+};
 export const OfferedCourseServices = {
-    createOfferedCourseIntoDb,
-    getAllOfferedCoursesFromDb,
-    getSingleOfferedCourseFromDb,
-    deleteOfferedCourseFromDb,
-    updateOfferedCourseIntoDb,
-  };
+  createOfferedCourseIntoDb,
+  getAllOfferedCoursesFromDb,
+  getSingleOfferedCourseFromDb,
+  deleteOfferedCourseFromDb,
+  updateOfferedCourseIntoDb,
+};

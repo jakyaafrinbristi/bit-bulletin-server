@@ -19,8 +19,5 @@ router.patch(
   OfferedCourseControllers.updateOfferedCourse,
 );
 
-router.delete(
-  '/:id',
-  OfferedCourseControllers.deleteOfferedCourseFromDb,
-);
-  export const offeredCourseRoutes = router;
+router.delete('/:id', OfferedCourseControllers.deleteOfferedCourseFromDb);
+export const offeredCourseRoutes = router;

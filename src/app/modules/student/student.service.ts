@@ -29,9 +29,9 @@ import mongoose from 'mongoose';
 //   return result;
 // };
 
-const getAllStudentsFromDB = async ( query : Record<string,unknown> ) => {
-  // console.log('base query', query) 
-  // const queryObj ={...query}; // copy 
+const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
+  // console.log('base query', query)
+  // const queryObj ={...query}; // copy
   // const studentSearchableFields = ['email','name.firstName',"presentAddress"]
   // let searchTerm ='';
   // if(query?.searchTerm){
@@ -43,20 +43,16 @@ const getAllStudentsFromDB = async ( query : Record<string,unknown> ) => {
   //   }))
   // })
 
-
   //filtering
 
+  // const  excludeFields = ['searchTerm','sort','limit','page','fields']
 
+  // excludeFields.forEach((el) => delete queryObj[el]);
 
-
-// const  excludeFields = ['searchTerm','sort','limit','page','fields']
-
-// excludeFields.forEach((el) => delete queryObj[el]);
-
-// console.log ({query},{queryObj})
-//   // const result = await searchQuery
-//   const filterQuery =  searchQuery
-//   .find(queryObj)
+  // console.log ({query},{queryObj})
+  //   // const result = await searchQuery
+  //   const filterQuery =  searchQuery
+  //   .find(queryObj)
   // .populate('admissionSemester')
   // .populate({
   //   path:'academicDepartment',
@@ -64,121 +60,118 @@ const getAllStudentsFromDB = async ( query : Record<string,unknown> ) => {
   //   populate:{
   //     path:'academicFaculty'
   //   }
-  // }) 
+  // })
 
+  // //sorting
+  // let sort ="-createdAt"
 
-// //sorting
-// let sort ="-createdAt"
+  // if(query.sort){
+  //   sort = query.sort as string;
+  // }
+  // // const sortQUery =await filterQuery.sort(sort)
+  // //limit
+  // const sortQUery = filterQuery.sort(sort)
 
-// if(query.sort){
-//   sort = query.sort as string;
-// }
-// // const sortQUery =await filterQuery.sort(sort)
-// //limit
-// const sortQUery = filterQuery.sort(sort)
+  // let page =1;
+  // let limit =1;
+  // let skip =0;
 
-// let page =1;
-// let limit =1;
-// let skip =0;
+  // if(query.limit){
+  //   limit =Number(query.limit)
+  // }
 
-// if(query.limit){
-//   limit =Number(query.limit)
-// }
+  // if(query.page){
+  //   page =Number(query.page)
+  //   skip = (page-1) * limit
+  // }
+  // const paginateQuery =sortQUery.skip(skip)
 
-// if(query.page){
-//   page =Number(query.page)
-//   skip = (page-1) * limit
-// }
-// const paginateQuery =sortQUery.skip(skip)
+  // // const limitQuery = await sortQUery.limit(limit);
+  // //   return limitQuery;
+  // // const limitQuery = await paginateQuery.limit(limit);
+  // const limitQuery = paginateQuery.limit(limit);
+  // //field limiting
 
+  // let fields = '-__v';
+  // if(query.fields){
+  //   fields=(query.fields as string).split(',').join(' ')
+  //   console.log(fields)
+  // }
+  // const fieldQuery =await limitQuery.select(fields);
 
+  //   // return limitQuery;
+  //   return fieldQuery ;
 
+  const studentQuery = new QueryBuilder(
+    Student.find()
+      .populate('user')
+      .populate('admissionSemester')
+      .populate({
+        path: 'academicDepartment',
 
-// // const limitQuery = await sortQUery.limit(limit);
-// //   return limitQuery;
-// // const limitQuery = await paginateQuery.limit(limit);
-// const limitQuery = paginateQuery.limit(limit);
-// //field limiting
+        populate: {
+          path: 'academicFaculty',
+        },
+      }),
+    query,
+  )
+    .search(studentSearchableFields)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
 
-// let fields = '-__v';
-// if(query.fields){
-//   fields=(query.fields as string).split(',').join(' ')
-//   console.log(fields)
-// }
-// const fieldQuery =await limitQuery.select(fields);
-
-//   // return limitQuery; 
-//   return fieldQuery ;
-
-const studentQuery = new QueryBuilder(Student.find()
-.populate('user')
-.populate('admissionSemester')
-.populate({
-  path:'academicDepartment',
-
-  populate:{
-    path:'academicFaculty'
-  }
-}) ,query)
-.search(studentSearchableFields).filter().sort().paginate().fields()
-
-const result =await studentQuery.modelQuery;
-return result;
-
-
+  const result = await studentQuery.modelQuery;
+  return result;
 };
 
 const getSingleStudentFromDB = async (id: string) => {
-
   // const result = await Student.aggregate
   // ([{ $match: { id: id } }]);
-  const result = await Student.findById(id)  //when we use mongoose id ,we will use this
-  // const result = await Student.findOne({ id })
-  .populate('admissionSemester')
-  .populate({
-    path:'academicDepartment',
-    populate:{
-      path:'academicFaculty'
-    }
-  })
+  const result = await Student.findById(id) //when we use mongoose id ,we will use this
+    // const result = await Student.findOne({ id })
+    .populate('admissionSemester')
+    .populate({
+      path: 'academicDepartment',
+      populate: {
+        path: 'academicFaculty',
+      },
+    });
   return result;
 };
-const updateStudentIntoDB = async (id: string ,payload:Partial<TStudent>) => {
+const updateStudentIntoDB = async (id: string, payload: Partial<TStudent>) => {
+  const { name, guardian, localGuardian, ...remainingStudentData } = payload;
 
-  const {name,guardian,localGuardian,...remainingStudentData} =payload;
+  const modifiedUpdatedData: Record<string, unknown> = {
+    ...remainingStudentData,
+  };
 
-  const modifiedUpdatedData : Record<string,unknown>={...remainingStudentData}
+  if (name && Object.keys(name).length) {
+    for (const [key, value] of Object.entries(name)) {
+      modifiedUpdatedData[`name.${key}`] = value;
+    }
+  }
 
-if(name && Object.keys(name).length){
-  for (const [key,value] of Object.entries(name)){
-    modifiedUpdatedData[`name.${key}`] = value;
+  if (guardian && Object.keys(guardian).length) {
+    for (const [key, value] of Object.entries(guardian)) {
+      modifiedUpdatedData[`guardian.${key}`] = value;
+    }
   }
-}
-   
-if(guardian && Object.keys(guardian).length){
-  for (const [key,value] of Object.entries(guardian)){
-    modifiedUpdatedData[`guardian.${key}`] = value;
+
+  if (localGuardian && Object.keys(localGuardian).length) {
+    for (const [key, value] of Object.entries(localGuardian)) {
+      modifiedUpdatedData[`localGuardian.${key}`] = value;
+    }
   }
-}
-   
-if(localGuardian && Object.keys(localGuardian).length){
-  for (const [key,value] of Object.entries(localGuardian)){
-    modifiedUpdatedData[`localGuardian.${key}`] = value;
-  }
-}
-   
 
   // const result = await Student.findOneAndUpdate({ id },
-  const result = await Student.findByIdAndUpdate({ id },
-    modifiedUpdatedData,{
-      new:true,
-      runValidators:true
-    }
-  )
+  const result = await Student.findByIdAndUpdate({ id }, modifiedUpdatedData, {
+    new: true,
+    runValidators: true,
+  });
 
-  
   return result;
-  }
+};
 
 const deleteStudentFromDB = async (id: string) => {
   const session = await mongoose.startSession();
@@ -190,7 +183,7 @@ const deleteStudentFromDB = async (id: string) => {
     //   { id },
 
     const deletedStudent = await Student.findByIdAndUpdate(
-      id ,
+      id,
       { isDeleted: true },
       { new: true, session },
     );
@@ -198,13 +191,13 @@ const deleteStudentFromDB = async (id: string) => {
     if (!deletedStudent) {
       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete student');
     }
-    
+
     // const deletedUser = await User.findOneAndUpdate(
     //   { id },
     //   { isDeleted: true },
     //   { new: true, session },
     // );
-    
+
     // get user _id from deletedStudent
     const userId = deletedStudent.user;
 
@@ -229,10 +222,9 @@ const deleteStudentFromDB = async (id: string) => {
   }
 };
 
-
 export const StudentServices = {
   getAllStudentsFromDB,
   getSingleStudentFromDB,
   deleteStudentFromDB,
-  updateStudentIntoDB
+  updateStudentIntoDB,
 };

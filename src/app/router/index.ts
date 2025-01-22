@@ -52,12 +52,12 @@ const moduleRoutes = [
   },
   {
     path: '/offered-courses',
-    route: offeredCourseRoutes
+    route: offeredCourseRoutes,
   },
   {
-    path:'/auth',
-    route:AuthRoutes
-  }
+    path: '/auth',
+    route: AuthRoutes,
+  },
 ];
 
 moduleRoutes.forEach((route) => router.use(route.path, route.route));
