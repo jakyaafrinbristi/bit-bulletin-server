@@ -2,6 +2,8 @@ import express from 'express';
 import validateRequest from '../../middlewares/validateRequest';
 import { AcademicDepartmentValidation } from './AcademicDepartment.validation';
 import { AcademicDepartmentControllers } from './AcademicDepartment.controller';
+import { USER_ROLE } from '../user/user.constant';
+import auth from '../../middlewares/auth';
 
 const router = express.Router();
 
@@ -26,6 +28,6 @@ router.patch(
   AcademicDepartmentControllers.updateAcademicDeartment,
 );
 
-router.get('/', AcademicDepartmentControllers.getAllAcademicDepartments);
+router.get('/',  auth(USER_ROLE.superAdmin ,USER_ROLE.admin),AcademicDepartmentControllers.getAllAcademicDepartments);
 
 export const AcademicDepartmentRoutes = router;

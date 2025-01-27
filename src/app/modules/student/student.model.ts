@@ -178,6 +178,7 @@ const studentSchema = new Schema<TStudent>(
     },
     profileImg: {
       type: String,
+      default:'',
       trim: true,
     },
     admissionSemester: {
@@ -199,6 +200,12 @@ const studentSchema = new Schema<TStudent>(
     academicDepartment: {
       type: Schema.Types.ObjectId,
       ref: 'AcademicDepartment',
+    },
+    academicFaculty: {
+      type: Schema.Types.ObjectId,
+      required: [true, 'Academic Faculty id is required'],
+     
+      ref: 'AcademicFaculty',
     },
 
     isDeleted: {
@@ -225,10 +232,10 @@ studentSchema.pre('find', function (next) {
 });
 
 //query middleware-findone
-// studentSchema.pre('findOne', function (next) {
-//   this.find({ isDeleted: { $ne: true } });
-//   next();
-// });
+studentSchema.pre('findOne', function (next) {
+  this.find({ isDeleted: { $ne: true } });
+  next();
+});
 
 //findone k aggregate diye kora
 studentSchema.pre('aggregate', function (next) {

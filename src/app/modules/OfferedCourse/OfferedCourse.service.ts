@@ -111,6 +111,7 @@ const createOfferedCourseIntoDb = async (payload: TOfferedCourse) => {
   const result = await OfferedCourse.create({ ...payload, academicSemester });
   return result;
 };
+
 const getAllOfferedCoursesFromDb = async (query: Record<string, unknown>) => {
   const offeredCourseQuery = new QueryBuilder(OfferedCourse.find(), query)
     .filter()
@@ -119,8 +120,16 @@ const getAllOfferedCoursesFromDb = async (query: Record<string, unknown>) => {
     .fields();
 
   const result = await offeredCourseQuery.modelQuery;
-  return result;
+  const meta = await offeredCourseQuery.countTotal();
+
+  return {
+    meta,
+    result,
+  };
 };
+const getMyOfferedCoursesFromDb=()=>{
+
+}
 
 const getSingleOfferedCourseFromDb = async (id: string) => {
   const offeredCourse = await OfferedCourse.findById(id);
@@ -198,6 +207,7 @@ const deleteOfferedCourseFromDb = async (id: string) => {
 export const OfferedCourseServices = {
   createOfferedCourseIntoDb,
   getAllOfferedCoursesFromDb,
+  getMyOfferedCoursesFromDb,
   getSingleOfferedCourseFromDb,
   deleteOfferedCourseFromDb,
   updateOfferedCourseIntoDb,

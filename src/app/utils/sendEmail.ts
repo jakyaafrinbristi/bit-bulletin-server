@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import config from '../config';
 
 export const sendEmail = async (to: string, html: string) => {
   const transporter = nodemailer.createTransport({
@@ -7,7 +8,7 @@ export const sendEmail = async (to: string, html: string) => {
     secure: false,
     auth: {
       user: 'jakyaafrinb@gmail.com',
-      pass: 'vcuv pzqq vazr vwgq',
+      pass:config.send_email ,
     },
   });
   await transporter.sendMail({

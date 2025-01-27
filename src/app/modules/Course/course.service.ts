@@ -22,7 +22,9 @@ const getAllCoursesFromDb = async (query: Record<string, unknown>) => {
     .paginate()
     .fields();
   const result = await courseQuery.modelQuery;
-  return result;
+  const meta = await courseQuery.countTotal();
+  return { 
+    result,meta};
 };
 const getSingleCoursesFromDb = async (id: string) => {
   const result = await Course.findById(id).populate(
@@ -140,6 +142,15 @@ const assignFacultiesWithCourseIntoDb = async (
   );
   return result;
 };
+
+
+const getFacultiesWithCourseFromDb = async (courseId: string) => {
+  const result = await CourseFaculty.findOne({course:courseId}).populate(
+    'faculties',
+  );
+  return result;
+};
+
 const removeFacultiesFromCourseFromDb = async (
   id: string,
   payload: Partial<TCourseFaculty>,
@@ -163,6 +174,7 @@ export const CourseServices = {
   deleteCoursesFromDb,
   assignFacultiesWithCourseIntoDb,
   removeFacultiesFromCourseFromDb,
+  getFacultiesWithCourseFromDb
 };
 // {
 //     "title":"Hyper Text Markup Language",

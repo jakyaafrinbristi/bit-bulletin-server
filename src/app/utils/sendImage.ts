@@ -1,5 +1,5 @@
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { v2 as cloudinary } from 'cloudinary';
 import config from '../config';
 import multer from 'multer';
@@ -13,7 +13,7 @@ cloudinary.config({
 }); 
 
 
-export const sendImage = (imageName: string, path: string): Promise<any> => {
+export const sendImage = (imageName: string, path: string): Promise<Record<string,unknown>> => {
   return new Promise((resolve, reject) => {
     cloudinary.uploader
       .upload(path, { public_id: imageName })
