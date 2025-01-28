@@ -12,6 +12,7 @@ import { SemesterRegistration } from "../SemesterRegistration/semesterRegistrati
 import { Course } from "../Course/course.model";
 import { Faculty } from "../Faculty/faculty.model";
 import { calculateGradeAndPoints } from "./enrolledCourse.utils";
+import QueryBuilder from "../../builder/QueryBuilder";
 
 const createEnrolledCourseIntoDB =async (userId:string , payload:TEnrolledCourse) =>{
 
@@ -148,6 +149,38 @@ const createEnrolledCourseIntoDB =async (userId:string , payload:TEnrolledCourse
     }
   };
 
+
+  const getMyEnrolledCoursesFromDB = async (
+    studentId: string,
+    query: Record<string, unknown>,
+  ) => {
+    const student = await Student.findOne({ id: studentId });
+  
+    if (!student) {
+      throw new AppError(httpStatus.NOT_FOUND, 'Student not found !');
+    }
+  
+    const enrolledCourseQuery = new QueryBuilder(
+      EnrolledCourse.find({ student: student._id }).populate(
+        'semesterRegistration academicSemester academicFaculty academicDepartment offeredCourse course student faculty',
+      ),
+      query,
+    )
+      .filter()
+      .sort()
+      .paginate()
+      .fields();
+  
+    const result = await enrolledCourseQuery.modelQuery;
+    const meta = await enrolledCourseQuery.countTotal();
+  
+    return {
+      meta,
+      result,
+    };
+  };
+  
+
   const updateEnrolledCourseMarksIntoDB = async (
     facultyId:string,
     payload:Partial<TEnrolledCourse>,
@@ -201,10 +234,10 @@ if (courseMarks?.finalTerm) {
     isCourseBelongToFaculty.courseMarks;
 
   const totalMarks =
-    Math.ceil(classTest1 * 0.1) +
-    Math.ceil(midTerm * 0.3) +
-    Math.ceil(classTest2 * 0.1) +
-    Math.ceil(finalTerm * 0.5);
+    Math.ceil(classTest1) +
+    Math.ceil(midTerm) +
+    Math.ceil(classTest2) +
+    Math.ceil(finalTerm);
 console.log(totalMarks)
   const result = calculateGradeAndPoints(totalMarks);
   console.log(result,totalMarks)
@@ -232,5 +265,5 @@ return result;
 
 export const EnrolledCourseServices ={
     createEnrolledCourseIntoDB,
-    updateEnrolledCourseMarksIntoDB
+    updateEnrolledCourseMarksIntoDB,getMyEnrolledCoursesFromDB
 }
