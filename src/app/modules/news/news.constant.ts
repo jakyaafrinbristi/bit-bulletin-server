@@ -1,0 +1,1 @@
+export const newsSearchableFields = ['title', 'slug', 'content', 'author', 'category'];

@@ -16,7 +16,7 @@ app.use('/api', router);
 const testServer = async (req: Request, res: Response) => {
   res.send({
     status: true,
-    message: 'BartaDesk-News-Server is running',
+    message: 'News-Server is running',
   });
 };
 
