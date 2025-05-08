@@ -148,6 +148,26 @@ const createEnrolledCourseIntoDB =async (userId:string , payload:TEnrolledCourse
       throw new Error(err);
     }
   };
+  const getAllEnrolledCOursesFromDB = async (query: Record<string, unknown>) => {
+    const enrolledCourseQuery = new QueryBuilder(
+      EnrolledCourse.find().populate(
+        'semesterRegistration academicSemester academicFaculty academicDepartment offeredCourse course student faculty',
+      ),
+      query,
+    )
+      .filter()
+      .sort()
+      .paginate()
+      .fields();
+  
+    const result = await enrolledCourseQuery.modelQuery;
+    const meta = await enrolledCourseQuery.countTotal();
+  
+    return {
+      meta,
+      result,
+    };
+  };
 
 
   const getMyEnrolledCoursesFromDB = async (
@@ -265,5 +285,5 @@ return result;
 
 export const EnrolledCourseServices ={
     createEnrolledCourseIntoDB,
-    updateEnrolledCourseMarksIntoDB,getMyEnrolledCoursesFromDB
+    updateEnrolledCourseMarksIntoDB,getMyEnrolledCoursesFromDB ,getAllEnrolledCOursesFromDB
 }

@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
 import catchAsync from '../utils/catchAsync';
@@ -20,11 +22,17 @@ const auth = (...requiredRoles: TUserRole[]) => {
     }
 
     //  check if the token is valid when  i am using backend
-    const decoded = jwt.verify(
-      token,
-      config.jwt_access_secret as string,
-    ) as JwtPayload;
-    console.log(decoded);
+    let decoded;
+ try{
+   decoded = jwt.verify(
+    token,
+    config.jwt_access_secret as string,
+  ) as JwtPayload;
+ }catch(err){
+  throw new AppError(httpStatus.UNAUTHORIZED, 'you are not authorized 401');
+
+ }
+    // console.log(decoded);
 
     const { role, userId, iat } = decoded;
 
@@ -52,7 +60,7 @@ const auth = (...requiredRoles: TUserRole[]) => {
       throw new AppError(httpStatus.FORBIDDEN, 'This user is blocked ! !');
     }
 
-    console.log(role);
+    // console.log(role);
 
     if (
       user.passwordChangedAt &&

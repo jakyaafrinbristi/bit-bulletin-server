@@ -129,6 +129,7 @@ const getAllOfferedCoursesFromDb = async (query: Record<string, unknown>) => {
   };
 };
 const getMyOfferedCoursesFromDb=async(userId:string, query:Record<string,unknown>)=>{
+  // console.log(userId)
    //pagination setup
 
    const page = Number(query?.page) || 1;
@@ -157,8 +158,8 @@ const aggregationQuery =[
   {
     $match :{
       semesterRegistration:currentOngoingRegistrationSemester?._id,
-      // academicFaculty:student.academicFaculty,
-      // academicDepartment:student.academicDepartment,
+      academicFaculty:student.academicFaculty,
+      academicDepartment:student.academicDepartment,
     }
   },
   {
@@ -284,7 +285,7 @@ const aggregationQuery =[
   {
     $match:{
       isAlreadyEnrolled : false,
-      isPreRequisitesFulFilled: true,
+      // isPreRequisitesFulFilled: true,
     }
   },
   
@@ -301,6 +302,7 @@ const paginationQuery =[{
 },]
 
 const result = await OfferedCourse.aggregate([...aggregationQuery,...paginationQuery]);
+// console.log(result)
 const total = (await OfferedCourse.aggregate(aggregationQuery)).length;
 const totalPage = Math.ceil(result.length / limit);
 
