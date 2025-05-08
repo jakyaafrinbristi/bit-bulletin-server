@@ -1,64 +1,21 @@
-import express, { NextFunction, Request, Response } from 'express';
-import { UserControllers } from './user.controller';
+import { NextFunction, Request, Response, Router } from 'express';
 
-import { createStudentValidationSchema } from '../student/student.validation';
-import validateRequest from '../../middlewares/validateRequest';
-import { createFacultyValidationSchema } from '../Faculty/faculty.validation';
-import { createAdminValidationSchema } from '../Admin/admin.validation';
-import auth from '../../middlewares/auth';
-import { USER_ROLE } from './user.constant';
-import { UserValidation } from './user.validation';
-import { upload } from '../../utils/sendImage';
+import { UserValidationSchema } from './user.validation';
+import { UserController } from './user.controller';
+import { upload } from '../../utils/fileUpload';
+import validationRequest from '../../middlewares/validateRequest';
 
-const router = express.Router();
-
+const router = Router();
 router.post(
-  '/create-student',
-  auth(USER_ROLE.superAdmin,USER_ROLE.admin),
+  '/register',
   upload.single('file'),
-  (req:Request, res:Response ,next:NextFunction)=>{
-    req.body = JSON.parse(req.body.data)
-next()
+  (req: Request, res: Response, next: NextFunction) => {
+    req.body = JSON.parse(req.body.data);
+    next();
   },
-  validateRequest(createStudentValidationSchema),
-  UserControllers.createStudent,
-);
-;
-router.post(
-  '/create-faculty',
-  auth(USER_ROLE.superAdmin,USER_ROLE.admin),
-  upload.single('file'),
-  (req:Request, res:Response ,next:NextFunction)=>{
-    req.body = JSON.parse(req.body.data)
-next()
-  },
-
-  validateRequest(createFacultyValidationSchema),
-  UserControllers.createFaculty,
+  validationRequest(UserValidationSchema.registerUserValidationSchema),
+  UserController.registerUser
 );
 
-router.post(
-  '/create-admin',
-  auth(USER_ROLE.superAdmin,USER_ROLE.admin),
-  upload.single('file'),
-  (req:Request, res:Response ,next:NextFunction)=>{
-    req.body = JSON.parse(req.body.data)
-next()
-  },
-
-  validateRequest(createAdminValidationSchema),
-  UserControllers.createAdmin,
-);
-router.post(
-  '/change-status/:id',
-  auth(USER_ROLE.superAdmin,USER_ROLE.admin),
-  validateRequest(UserValidation.changeStatusValidationSchema),
-  UserControllers.changeStatus,
-);
-router.get(
-  '/me',
-  auth(USER_ROLE.superAdmin,USER_ROLE.admin),
-  UserControllers.getMe,
-)
-
-export const UserRoutes = router;
+router.get('/', UserController.getAllUser);
+export const userRouter = router;

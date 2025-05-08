@@ -1,45 +1,26 @@
 /* eslint-disable no-unused-vars */
-
-//type method
-// export type TUser = {
-//   id: string;
-//   password: string;
-//   needsPasswordChange: boolean;
-//   role: 'admin' | 'student' | 'faculty';
-//   status: 'in-progress' | 'blocked';
-//   isDeleted: boolean;
-// };
-
 import { Model } from 'mongoose';
-import { USER_ROLE } from './user.constant';
+import { User_Role } from './user.constant';
 
-//  export type NewUser = {
-//   password: string;
-//   role: string;
-// };
-
-//interface method
-
-export interface TUser {
-  id: string;
+export interface IUser {
+  name: string;
   email: string;
   password: string;
-  needsPasswordChange: boolean;
-  passwordChangedAt?: Date;
-  role:'super-admin' | 'admin' | 'student' | 'faculty';
-  status: 'in-progress' | 'blocked';
-  isDeleted: boolean;
+  role?: 'admin' | 'editor' | 'reporter';
+  bio?: string;
+  profilePhoto?: string;
 }
 
-export interface UserModel extends Model<TUser> {
-  isUserExistsByCustomId(id: string): Promise<TUser>;
+export interface UserModel extends Model<IUser> {
+  isUserExitsByEmail(email: string): Promise<IUser | null>;
   isPasswordMatched(
-    plainTextPassword: string,
-    hashedPassword: string,
-  ): Promise<boolean>;
-  isJWTIssuedBeforePasswordChanged(
+    planePassword: string,
+    hashedPassword: string
+  ): Promise<IUser>;
+  isPasswordIssuedBeforeChange(
     passwordChangedTimestamp: Date,
-    jwtIssuedTimestamp: number,
+    passwordIssuedTimestamp: number
   ): boolean;
 }
-export type TUserRole = keyof typeof USER_ROLE;
+
+export type TUserRole = keyof typeof User_Role;

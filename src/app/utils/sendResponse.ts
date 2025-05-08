@@ -1,24 +1,18 @@
-import { Response } from 'express';
-type TMeta = {
-  limit: number;
-  page: number;
-  total: number;
-  totalPage: number;
-};
-
-type TResponse<T> = {
+import { Response } from "express";
+// send response interface defination
+interface ISendResponse<T> {
   statusCode: number;
   success: boolean;
-  message?: string;
-  meta?:TMeta;
-  data: T;
-};
-
-const sendResponse = <T>(res: Response, data: TResponse<T>) => {
+  message: string;
+  token?: string;
+  data: T | T[] | null;
+}
+//send response with custom function defination
+const sendResponse = <T>(res: Response, data: ISendResponse<T>) => {
   res.status(data?.statusCode).json({
-    success: data.success,
-    message: data.message,
-    meta:data.meta,
+    success: data?.success,
+    message: data?.message,
+    token: data.token,
     data: data.data,
   });
 };

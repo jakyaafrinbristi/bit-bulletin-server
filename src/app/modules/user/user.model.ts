@@ -1,92 +1,48 @@
-import { Schema, model } from 'mongoose';
-
-import { TUser, UserModel } from './user.interface';
-import config from '../../config';
-import bcrypt from 'bcrypt';
-import { UserStatus } from './user.constant';
-
-const userSchema = new Schema<TUser, UserModel>(
+import mongoose, { model } from "mongoose";
+import { IUser, UserModel } from "./user.interface";
+import bcrypt from "bcrypt";
+import config from "../../config";
+const userSchema = new mongoose.Schema<IUser>(
   {
-    id: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    password: {
-      type: String,
-      required: true,
-      select: 0,
-    },
-    needsPasswordChange: {
-      type: Boolean,
-      default: true,
-    },
-    passwordChangedAt: {
-      type: Date,
-    },
+    name: { type: String, required: true },
+    email: { type: String, unique: true, required: true },
+    password: { type: String, required: true },
     role: {
       type: String,
-      enum: ['superAdmin','student', 'faculty', 'admin'],
+      enum: ["admin", "editor", "reporter"],
+      default: "reporter",
     },
-    status: {
-      type: String,
-      // enum: ['in-progress', 'blocked'],
-      enum: UserStatus,
-      default: 'in-progress',
-    },
-    isDeleted: {
-      type: Boolean,
-      default: false,
-    },
+    bio: String,
+    profilePhoto: String,
   },
-  {
-    timestamps: true,
-  },
+  { timestamps: true }
 );
-// pre save middleware/ hook : will work on create()  save()
-userSchema.pre('save', async function (next) {
-  // console.log(this, 'pre hook : we will save  data');
+
+userSchema.pre("save", async function (next) {
   // eslint-disable-next-line @typescript-eslint/no-this-alias
-  const user = this; // doc
-  // hashing password and save into DB
+  const user = this;
   user.password = await bcrypt.hash(
     user.password,
-    Number(config.bcrypt_salt_rounds),
+    Number(config.bcrypt_salt_rounds)
   );
   next();
 });
-// post save middleware / hook
-userSchema.post('save', function (doc, next) {
-  // console.log(this, 'post hook : we  saved our  data');
-  doc.password = '';
+
+userSchema.post("save", async function (doc, next) {
+  doc.password = "";
   next();
 });
 
-//static auth system for id
-userSchema.statics.isUserExistsByCustomId = async function (id: string) {
-  return await User.findOne({ id }).select('+password');
+// user find by email with static method
+userSchema.statics.isUserExitsByEmail = async function (email: string) {
+  return await User.findOne({ email }).select("+password");
 };
 
-//static auth system for password
+// user password match checkin with static method
 userSchema.statics.isPasswordMatched = async function (
-  plainTextPassword,
-  hashedPassword,
+  planeTextPassword,
+  hashedPassword
 ) {
-  return await bcrypt.compare(plainTextPassword, hashedPassword);
+  return await bcrypt.compare(planeTextPassword, hashedPassword);
 };
-
-userSchema.statics.isJWTIssuedBeforePasswordChanged = function (
-  passwordChangedTimestamp: Date,
-  jwtIssuedTimestamp: number,
-) {
-  const passwordChangedTime =
-    new Date(passwordChangedTimestamp).getTime() / 1000;
-  return passwordChangedTime > jwtIssuedTimestamp;
-};
-
-export const User = model<TUser, UserModel>('User', userSchema);
+export const User = model<IUser, UserModel>("User", userSchema);
